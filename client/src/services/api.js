@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: "http://localhost:8000/profile" });
+const API = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL });
 
 // Profile APIs
 export const createOrUpdateProfile = async (data) =>

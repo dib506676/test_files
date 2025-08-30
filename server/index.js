@@ -6,29 +6,37 @@ import profileRoutes from "./routes/profile.js";
 
 dotenv.config();
 
-// DB connect
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.error(err));
-
 const app = express();
+
+// Middleware
 app.use(cors({
-  origin: "*", // or specify your frontend URL
+  origin: "*", // ✅ Replace with your frontend URL in production
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-
-// Health endpoint
 app.get("/health", (req, res) => {
   return res.status(200).json({ status: "ok" });
 });
 app.use("/profile", profileRoutes);
 
-
-
+// Start server only after DB connects
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => {
+    console.log("✅ MongoDB Connected");
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Failed:", err.message);
+    process.exit(1); // Exit process if DB fails
+  });
